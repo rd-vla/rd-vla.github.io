@@ -1,0 +1,10 @@
+VLA-Adapter.github.io/
+webpage/
+scripts/
+
+# Keep oversized real-world videos local (not in git history).
+static/videos/real_world/**/baseline_dp.mp4
+static/videos/real_world/**/rd_vla_8_iterations.mp4
+static/videos/real_world/**/rd_vla_adaptive.mp4
+static/videos/real_world/**/rd_vla_8_adaptive.mp4
+static/videos/real_world/**/*.mov

@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>RD-VLA</title>
+    <meta name="description" content="RD-VLA">
+    <meta name="keywords" content="Foundation Model, Robot Learning">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+    <link rel="stylesheet" href="./static/css/bulma.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+    <!-- <link rel="stylesheet" href="./static/css/fontawesome.all.min.css"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="./static/css/index.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- <script defer src="./static/js/fontawesome.all.min.js"></script> -->
+    <script src="./static/js/bulma-carousel.min.js"></script>
+    <script src="./static/js/bulma-slider.min.js"></script>
+    <script src="./static/js/index.js"></script>
+
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script> -->
+
+
+    <script type="text/javascript" async 
+        src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+    </script>
+    <script type="text/javascript" async 
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js">
+    </script>
+
+    <script type="text/javascript">
+        function init() {
+            const video_sam2act = document.getElementById("simulation-menu-video-sam2act");
+            if (video_sam2act) {
+                video_sam2act.addEventListener("error", () => {
+                    console.log("Error loading video: ", video_sam2act.src);
+                }, true);
+            }
+
+            const video_baseline = document.getElementById("simulation-menu-video-baseline");
+            if (video_baseline) {
+                video_baseline.addEventListener("error", () => {
+                    console.log("Error loading video: ", video_baseline.src);
+                }, true);
+            }
+
+            const video_comparison_rdvla = document.getElementById("comparison-menu-video-rdvla");
+            if (video_comparison_rdvla) {
+                video_comparison_rdvla.addEventListener("error", () => {
+                    handleVideoFallback(video_comparison_rdvla);
+                }, true);
+            }
+
+            const video_comparison_baseline = document.getElementById("comparison-menu-video-baseline");
+            if (video_comparison_baseline) {
+                video_comparison_baseline.addEventListener("error", () => {
+                    handleVideoFallback(video_comparison_baseline);
+                }, true);
+            }
+
+            const video_memorybench = document.getElementById("memorybench-menu-video-method");
+            if (video_memorybench) {
+                video_memorybench.addEventListener("error", () => {
+                    console.log("Error loading video: ", video_memorybench.src);
+                }, true);
+            }
+        }
+
+        function updateTaskVideo() {
+            const video_sam2act = document.getElementById("simulation-menu-video-sam2act");
+            const video_baseline = document.getElementById("simulation-menu-video-baseline");
+            const taskElement = document.getElementById("simulation-menu-task-name");
+            const baselineElement = document.getElementById("simulation-menu-baseline-name");
+            if (!video_sam2act || !video_baseline || !taskElement || !baselineElement) {
+                return;
+            }
+
+            const task = taskElement.value;
+            const baseline = baselineElement.value;
+
+            video_sam2act.src = `static/videos/simulation/sam2act/${task}_fixed.mp4`;;
+            video_sam2act.playbackRate = 1.75;
+            video_sam2act.play();
+
+            video_baseline.src = `static/videos/simulation/${baseline}/${task}_fixed.mp4`;
+            video_baseline.playbackRate = 1.75;
+            video_baseline.play();
+        }
+
+        function getComparisonPlaybackRate() {
+            const speedElement = document.getElementById("comparison-menu-speed");
+            if (!speedElement) {
+                return 1.0;
+            }
+            const speed = parseFloat(speedElement.value);
+            if (speed === 1 || speed === 2 || speed === 4 || speed === 8) {
+                return speed;
+            }
+            return 1.0;
+        }
+
+        function updateComparisonPlaybackRate() {
+            const speed = getComparisonPlaybackRate();
+            const videoRdvla = document.getElementById("comparison-menu-video-rdvla");
+            const videoBaseline = document.getElementById("comparison-menu-video-baseline");
+
+            if (videoRdvla) {
+                videoRdvla.playbackRate = speed;
+                videoRdvla.play();
+            }
+            if (videoBaseline) {
+                videoBaseline.playbackRate = speed;
+                videoBaseline.play();
+            }
+        }
+
+        function setVideoSourceWithFallback(videoElement, basePath) {
+            videoElement.dataset.basePath = basePath;
+            videoElement.dataset.extIndex = "0";
+            videoElement.src = `${basePath}.mp4`;
+            videoElement.playbackRate = getComparisonPlaybackRate();
+            videoElement.play();
+        }
+
+        function handleVideoFallback(videoElement) {
+            const basePath = videoElement.dataset.basePath;
+            if (!basePath) {
+                console.log("Error loading video: ", videoElement.src);
+                return;
+            }
+
+            const extIndex = parseInt(videoElement.dataset.extIndex || "0", 10);
+            if (extIndex === 0) {
+                videoElement.dataset.extIndex = "1";
+                videoElement.src = `${basePath}.mov`;
+                videoElement.playbackRate = getComparisonPlaybackRate();
+                videoElement.play();
+                return;
+            }
+
+            console.log("Error loading video: ", videoElement.src);
+        }
+
+        function updateComparisonVideo() {
+            const taskElement = document.getElementById("comparison-menu-task-name");
+            const rdvlaElement = document.getElementById("comparison-menu-rdvla-name");
+            const baselineElement = document.getElementById("comparison-menu-baseline-name");
+            const video_rdvla = document.getElementById("comparison-menu-video-rdvla");
+            const video_baseline = document.getElementById("comparison-menu-video-baseline");
+            if (!taskElement || !rdvlaElement || !baselineElement || !video_rdvla || !video_baseline) {
+                return;
+            }
+
+            const task = taskElement.value;
+            const rdvlaSetting = rdvlaElement.value;
+            const baselineSetting = baselineElement.value;
+            const rdvlaFileMap = {
+                "8_iterations": "8_iterations",
+                "adaptive": "8_adaptive",
+            };
+            const baselineFileMap = {
+                "dp": "dp",
+                "pi05": "pi0.5",
+            };
+
+            setVideoSourceWithFallback(video_rdvla, `static/videos/real_world/${task}/rd_vla_${rdvlaFileMap[rdvlaSetting] || rdvlaSetting}`);
+
+            setVideoSourceWithFallback(video_baseline, `static/videos/real_world/${task}/baseline_${baselineFileMap[baselineSetting] || baselineSetting}`);
+
+            updateComparisonPlaybackRate();
+        }
+
+        function setKeyframeVideoSourceWithFallback(videoElement, basePath) {
+            videoElement.dataset.basePath = basePath;
+            videoElement.dataset.extIndex = "0";
+            videoElement.src = `${basePath}.mp4`;
+            videoElement.load();
+        }
+
+        function handleKeyframeVideoFallback(videoElement) {
+            const basePath = videoElement.dataset.basePath;
+            if (!basePath) {
+                console.log("Error loading video: ", videoElement.src);
+                return;
+            }
+
+            const extIndex = parseInt(videoElement.dataset.extIndex || "0", 10);
+            if (extIndex === 0) {
+                videoElement.dataset.extIndex = "1";
+                videoElement.src = `${basePath}.mov`;
+                videoElement.load();
+                return;
+            }
+
+            console.log("Error loading video: ", videoElement.src);
+        }
+
+        function bindSliderControlledVideo(videoElement, sliderElement) {
+            if (!videoElement || !sliderElement) {
+                return;
+            }
+
+            videoElement.addEventListener("loadedmetadata", () => {
+                sliderElement.value = "0";
+                videoElement.currentTime = 0;
+                videoElement.pause();
+            });
+
+            sliderElement.addEventListener("input", () => {
+                if (!isFinite(videoElement.duration) || videoElement.duration <= 0) {
+                    return;
+                }
+                const ratio = parseFloat(sliderElement.value) / 100.0;
+                videoElement.currentTime = ratio * videoElement.duration;
+            });
+
+            videoElement.addEventListener("play", () => {
+                videoElement.pause();
+            });
+        }
+
+        function initKeyframeComparisonSection() {
+            const keyframeVideoDir = "static/videos/adaptive";
+            const autoplayBasePaths = [
+                `${keyframeVideoDir}/autoplay/col1`,
+                `${keyframeVideoDir}/autoplay/col2`,
+                `${keyframeVideoDir}/autoplay/col3`,
+            ];
+            const scrubBasePaths = [
+                `${keyframeVideoDir}/scrub/col1`,
+                `${keyframeVideoDir}/scrub/col2`,
+                `${keyframeVideoDir}/scrub/col3`,
+            ];
+
+            autoplayBasePaths.forEach((basePath, idx) => {
+                const video = document.getElementById(`keyframe-autoplay-video-${idx + 1}`);
+                if (!video) {
+                    return;
+                }
+                video.addEventListener("error", () => {
+                    handleKeyframeVideoFallback(video);
+                }, true);
+                video.addEventListener("loadedmetadata", () => {
+                    video.play().catch(() => {});
+                });
+                setKeyframeVideoSourceWithFallback(video, basePath);
+            });
+
+            scrubBasePaths.forEach((basePath, idx) => {
+                const video = document.getElementById(`keyframe-scrub-video-${idx + 1}`);
+                const slider = document.getElementById(`keyframe-scrub-slider-${idx + 1}`);
+                if (!video || !slider) {
+                    return;
+                }
+                video.addEventListener("error", () => {
+                    handleKeyframeVideoFallback(video);
+                }, true);
+                bindSliderControlledVideo(video, slider);
+                setKeyframeVideoSourceWithFallback(video, basePath);
+            });
+        }
+
+        function updateMemoryBenchVideo() {
+            const video = document.getElementById("memorybench-menu-video-method");
+            const taskElement = document.getElementById("memorybench-menu-task-name");
+            const methodElement = document.getElementById("memorybench-menu-method-name");
+            const episodeElement = document.getElementById("memorybench-menu-episode-name");
+            if (!video || !taskElement || !methodElement || !episodeElement) {
+                return;
+            }
+
+            const task = taskElement.value;
+            const method = methodElement.value;
+            const episode = episodeElement.value;
+
+            video.src = `static/videos/memorybench/${method}/${task}_${episode}_fixed.mp4`;
+            video.playbackRate = 1.75;
+            video.play();
+        }
+
+        function getRandomInt(max) {
+            return Math.floor(Math.random() * max);
+        }
+
+        function updateColosseumVideo() {
+            const video = document.getElementById("colosseum-menu-video-episode");
+            if (!video) {
+                return;
+            }
+
+            const available_episodes = [
+                "basketball_in_hoop_0_s0",
+                "basketball_in_hoop_0_s1",
+                "basketball_in_hoop_0_s2",
+                // "close_box_1_s0",
+                "close_box_1_s1",
+                // "close_box_1_s2",
+                "close_laptop_lid_2_s0",
+                "close_laptop_lid_2_s1",
+                // "close_laptop_lid_2_s2",
+                // "hockey_5_s0",
+                // "hockey_5_s1",
+                // "hockey_5_s2",
+                // "setup_chess_14_s0",
+                // "setup_chess_14_s1",
+                // "setup_chess_14_s2",
+                "insert_onto_square_peg_6_s0",
+                "insert_onto_square_peg_6_s1",
+                "insert_onto_square_peg_6_s2",
+                "stack_cups_13_s0",
+                // "stack_cups_13_s1",
+                // "stack_cups_13_s2",
+                // "straighten_rope_10_s0",
+                // "straighten_rope_10_s1",
+                "straighten_rope_10_s2",
+                "meat_on_grill_8_s0",
+                "meat_on_grill_8_s1",
+                "meat_on_grill_8_s2",
+                "turn_oven_on_12_s0",
+                "turn_oven_on_12_s1",
+                "turn_oven_on_12_s2",
+                // "move_hanger_9_s0",
+                // "move_hanger_9_s1",
+                "move_hanger_9_s2",
+                // "empty_dishwasher_3_s0",
+                // "empty_dishwasher_3_s1",
+                // "empty_dishwasher_3_s2",
+                // "wipe_desk_11_s0",
+                // "wipe_desk_11_s1",
+                "wipe_desk_11_s2",
+                "place_wine_at_rack_location_7_s0",
+                "place_wine_at_rack_location_7_s1",
+                "place_wine_at_rack_location_7_s2",
+                // "get_ice_from_fridge_4_s0",
+                // "get_ice_from_fridge_4_s1",
+                "get_ice_from_fridge_4_s2"
+            ];
+
+            const ep_index = getRandomInt(available_episodes.length);
+            const uri = `static/videos/colosseum/${available_episodes[ep_index]}_fixed.mp4`;
+
+            video.src = uri;
+            video.playbackRate = 1.75;
+            video.play();
+        }
+
+        function updateComparisonOutDistVideo() {
+            const video_sam2act = document.getElementById("outdistribution-menu-video-sam2act");
+            const video_rvt2 = document.getElementById("outdistribution-menu-video-rvt2");
+            const taskElement = document.getElementById("outdistribution-menu-task-name");
+            const episodeElement = document.getElementById("outdistribution-menu-episode-name");
+            if (!video_sam2act || !video_rvt2 || !taskElement || !episodeElement) {
+                return;
+            }
+
+            const task = taskElement.value;
+            const episode = episodeElement.value;
+
+            video_sam2act.src = `static/videos/out_of_distribution/${task}/vid_sam2act_turn_on_out_${episode}.mp4`;
+            video_sam2act.playbackRate = 1.75;
+            video_sam2act.play();
+
+            video_rvt2.src = `static/videos/out_of_distribution/${task}/vid_rvt_turn_on_out_${episode}.mp4`;
+            video_rvt2.playbackRate = 1.75;
+            video_rvt2.play();
+        }
+    </script>
+
+
+
+</head>
+
+<body onload="init(); initKeyframeComparisonSection(); updateTaskVideo(); updateComparisonVideo(); updateMemoryBenchVideo(); updateColosseumVideo(); updateComparisonOutDistVideo();">
+    <!-- Title / Authors Info -->
+    <section class="hero">
+        <div  class="hero-body" style="padding-bottom: 3rem !important;">
+            <div class="container is-max-desktop">
+                <div class="columns is-centered">
+                    <div class="column has-text-centered">
+                        <h1 class="title is-1 publication-title" style="margin-bottom: 0 !important; display: flex; align-items: center; justify-content: center;">
+                            Recurrent-Depth VLA:
+                        </h1>
+                        <h2 class="title is-2 publication-title">
+                            Implicit Test-Time Compute Scaling of
+                            <br>
+                            Vision–Language–Action Models via
+                            <br>
+                            Latent Iterative Reasoning
+                        </h2>                        
+                        <div class="is-size-5 publication-authors">
+                            <span class="author-block">
+                                <a target="_blank" href="https://scholar.google.com/citations?user=4MfYK6kAAAAJ&hl=en">Yalcin Tur</a><sup>1</sup>,
+                            </span>
+                            <span class="author-block">
+                                <a target="_blank" href="https://scholar.google.com/citations?user=w5uC4i8AAAAJ&hl=en">Jalal Naghiyev</a><sup>2</sup>*,
+                            </span>
+                            <span class="author-block">
+                                <a target="_blank" href="https://hq-fang.github.io/">Haoquan Fang</a><sup>3, 4</sup>*,
+                            </span>
+                            <span class="author-block">
+                                <a target="_blank" href="https://www.linkedin.com/in/williamtsai726/">Wei-Chuan Tsai</a><sup>3</sup>,
+                            </span>
+                            <br>
+                            <span class="author-block">
+                                <a target="_blank" href="https://duanjiafei.com/">Jiafei Duan</a><sup>3, 4†</sup>
+                            </span>
+                            <span class="author-block">
+                                <a target="_blank" href="https://homes.cs.washington.edu/~fox/">Dieter Fox</a><sup>3, 4†</sup>,
+                            </span>
+                            <span class="author-block">
+                                <a target="_blank" href="https://ranjaykrishna.com/">Ranjay Krishna</a><sup>3, 4†</sup>
+                            </span>
+                        </div>
+                        <br>
+                        <div class="is-size-5 publication-authors">
+                            <span class="author-block"><sup>1</sup>Stanford University</span>
+                            <span class="author-block"><sup>2</sup>Technical University of Munich</span>
+                            <br>
+                            <span class="author-block"><sup>3</sup>University of Washington</span>
+                            <span class="author-block"><sup>4</sup>Allen Institute for AI</span>
+                        </div>
+                        <br>
+                        <div class="is-size-5 publication-authors">
+                            <span class="author-block">*Equal Contribution    †Equal Advising</span>
+                        </div>
+                        <br>
+                        <div class="is-size-5 publication-authors">
+                            <span class="author-block">
+                                <p style="color:#ffd37a; font-weight:700; text-shadow:0 2px 10px rgba(0,0,0,0.35);">Under Review</p>
+                            </span>
+                        </div>
+                        <div class="column has-text-centered">
+                            <!-- ArXiv link -->
+                            <span class="link-block">
+                                <a target="_blank" href="https://arxiv.org/abs/2501.18564" class="external-link button is-normal is-rounded is-dark">
+                                    <!-- <span class="icon"><i class="ai ai-arxiv"></i></span> -->
+                                    <span class="icon"><img src="static/images/arxiv_icon_small.svg" style="height: 16px;"/></i></span>
+                                    <span>arXiv</span>
+                                </a>
+                            </span>
+                            <!-- Code Link. -->
+                            <span class="link-block">
+                                <a target="_blank" href="https://github.com/sam2act/sam2act" class="external-link button is-normal is-rounded is-dark">
+                                    <span class="icon"><i class="fab fa-github"></i></span>
+                                    <span>Code</span>
+                                </a>
+                            </span>
+                            <!-- X Post Link. -->
+                            <span class="link-block">
+                                <a target="_blank" href="https://x.com/DJiafei/status/1884954101697699940" class="external-link button is-normal is-rounded is-dark">
+                                    <span class="icon"><i class="fab fa-x-twitter"></i></span>
+                                    <span>Post</span>
+                                </a>
+                            </span>
+                            <div class="is-size-6 publication-authors">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container is-max-desktop">
+            <!-- Video Teaser -->
+            <video id="teaser" autoplay muted muted loop playsinline height="100">
+                <source src="static/videos/vid_intro.mp4" type="video/mp4">
+            </video>
+            <!-- /Video Teaser -->
+            <br/>
+            <br/>
+            <!-- Abstract. -->
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-four-fifths">
+                    <h2 class="title is-3">Abstract</h2>
+                    <div class="content has-text-justified">
+                        <p>
+                            Current Vision-Language-Action (VLA) models utilize fixed computational depth, processing simple adjustments and complex multi-step manipulations with same amount of compute. 
+                            While Chain-of-Thought (CoT) prompting enables variable compute, it scales memory linearly and struggles with continuous action spaces. We introduce Recurrent-Depth VLA (RD-VLA), 
+                            an architecture that achieves computational adaptivity through latent iterative refinement instead of explicit token generation. RD-VLA employs a recurrent action head with weight-tied layers, 
+                            enabling arbitrary depth with a constant memory footprint. We train the model using truncated backpropagation through time (TBPTT), allowing for efficient supervision of the refinement process. 
+                            At inference, an adaptive stopping criterion based on latent convergence enables the model to dynamically allocate compute per sample. Our experiments on complex manipulation tasks demonstrate 
+                            that recurrent depth is critical for success: tasks failing (0%) with single-iteration inference achieve +90% success with four iterations, while simpler tasks saturate quickly. 
+                            RD-VLA provides a scalable path for test-time compute in robotics, bypassing the data and memory overhead of CoT while replacing discrete, token-based reasoning with latent reasoning, 
+                            which maintains a constant memory footprint regardless of depth, and does not require any special data collection.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!--/ Abstract. -->
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container is-max-desktop">
+            <h2 class="title is-3">Summary</h2>
+            <div class="columns is-centered has-text-centered">
+                <div class="column">
+                    <p>
+                        <figure>
+                            <img src="static/images/img_overview.jpeg" style="max-width: 100%; height: auto;">
+                        </figure>
+                        <br>
+                        <div class="content has-text-justified">
+                            We introduce Recurrent-Depth VLA. (Left) Previous reasoning VLAs (e.g., ThinkAct, MolmoAct) generate explicit reasoning tokens
+                            in output space, requiring expensive autoregressive decoding. (Center) Our approach performs iterative refinement entirely
+                            in latent representation space, bypassing token generation overhead. (Right) RD-VLA achieves comparable performance to
+                            autoregressive reasoning baselines on LIBERO-10 while being substantially faster due to the efficiency of latent reasoning with
+                            adaptive compute.
+                        </div>
+                    </p>
+                </div>
+            </div>
+            
+            <h2 class="title is-3">Method Overview</h2>
+            <div class="columns is-centered has-text-centered">
+                <div class="column">
+                    <p>
+                        <figure>
+                            <img src="static/images/img_architecture.png" style="max-width: 100%; height: auto;">
+                        </figure>
+                        <br>
+                        <div class="content has-text-justified">
+                            We introduce a framework that decouples computational
+                            depth from the fixed architectural constraints of pretrained
+                            vision-language backbones. While standard VLA architectures
+                            typically utilize fixed-depth heads, RD-VLA shifts the com-
+                            putational burden to a weight-tied recurrent transformer core
+                            operating within a continuous latent manifold. Following the
+                            Huggin approach, we partition the architecture into a
+                            functional triplet: the Prelude, the Recurrent Core, and the
+                            Coda (Fig. 2). The Prelude and Coda serve as non-recurrent
+                            interface layers that map representations into and out of a
+                            dedicated latent manifold optimized for iterative reasoning.
+                        </div>
+                    </p>
+                </div>
+            </div>
+
+            <h2 class="title is-3">Adaptive Computation and Execution</h2>
+            <div class="columns is-centered has-text-centered">
+                <div class="column">
+                    <p>
+                        <figure>
+                            <img src="static/images/img_adaptive.png" style="max-width: 70%; height: auto;">
+                        </figure>
+                        <br>
+                        <div class="content has-text-justified">
+                            <b>Adaptive Computation</b>
+                            Leveraging the properties of the model, we implement an
+                            adaptive computation mechanism at inference. Rather than
+                            specifying a fixed iteration count, we utilize the model's own
+                            internal convergence as a proxy for reasoning certainty.
+                            We define a stopping criterion based on the Kullback-
+                            Leibler (KL) divergence between the action distributions of
+                            consecutive iterations. Approximating KL via Mean Squared
+                            Error (MSE) in the action space, the inference loop terminates
+                            at step k* when:
+                            <p>$$ ||\mathbf{a}_k - \mathbf{a}_{k-1}||^2_2 < \delta. $$</p>
+                            where ak is the predicted action chunk at step k and δ is a
+                            convergence threshold (e.g., 1e−3). This allows the model to
+                            self-regulate: terminating instantly for trivial movements while
+                            allocating extended compute for complex situations.
+                            <br></br>
+                            <b>Adaptive Execution</b>
+                            Adaptive computation determines how long to recur. At the
+                            same time adaptive execution determines how many actions to
+                            execute. We observe that instances requiring deep recurrence
+                            (k* > 8) often correspond to states of high uncertainty.
+                            In these regimes, executing a long horizon of actions is
+                            dangerous, as small errors in the initial plan compound over
+                            time.
+                            We propose two strategies to couple the depth of reasoning
+                            with the execution of action: (1) Threshold-Based Adaptive Execution and (2) Linear Decay Execution.
+                        </div>
+                    </p>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+
+    <section class="section">
+        <div class="container is-max-widescreen">
+      <h2 class="title is-3">Experiments and Visualization</h2>
+      <div class="columns is-centered has-text-centered">
+        <h2 class="title is-4">Please find more quantitative results on our paper!</h2>
+      </div>
+
+      <!------------------------------------------------------->
+      <!---------------- LIBERO-Spatial  ---------------->
+      <!------------------------------------------------------->
+      <h2 class="title is-4" style="font-family: 'Google Sans', sans-serif; margin-top: 1rem; font-size: 22px;">
+        LIBERO-Spatial</h2>
+      <style>
+        .video-container {display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px;}
+        .video-item {width: 13.3%; display: flex; flex-direction: column; align-items: center; text-align: center;}
+        .video-item video {width: 100%; height: auto;}
+        .caption {margin-top: 5px; font-size: 13px; color: #555;}
+      </style>
+
+      <div class="video-container">
+        <div class="video-item">
+          <video id="teaserl1s" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/s1.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the black bowl between the plate and the ramekin and place it on the plate </div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl2s" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/s2.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the black bowl next to the ramekin and place it on the plate</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl3s" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/s3.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the black bowl from table center and place it on the plate</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl4s" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/s4.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the black bowl on the cookie box and place it on the plate</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl5s" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/s5.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl6s" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/s6.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the black bowl on the stove and place it on the plate</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl7s" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/s7.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the black bowl next to the plate and place it on the plate</div>
+        </div>
+      </div>
+
+      <!------------------------------------------------------->
+      <!---------------- LIBERO-Object  ----------------->
+      <!------------------------------------------------------->
+      <h2 class="title is-4" style="font-family: 'Google Sans', sans-serif; margin-top: 1rem; font-size: 22px;">
+        LIBERO-Object</h2>
+      <div class="video-container">
+        <div class="video-item">
+          <video id="teaserl1o" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/Long1.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the alphabet soup and place it in the basket</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl2o" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/Long2.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the salad dressing and place it in the basket</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl3o" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/Long3.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the bbq sauce and place it in the basket</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl4o" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/Long4.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the ketchup and place it in the basket </div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl5o" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/Long5.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the tomato sauce and place it in the basket</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl6o" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/Long6.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the milk and place it in the basket  </div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl7o" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/Long7.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the chocolate pudding and place it in the basket </div>
+        </div>
+      </div>
+
+      <!------------------------------------------------------->
+      <!----------------- LIBERO-Goal  ------------------>
+      <!------------------------------------------------------->
+      <h2 class="title is-4" style="font-family: 'Google Sans', sans-serif; margin-top: 1rem; font-size: 22px;">
+        LIBERO-Goal</h2>
+      <div class="video-container">
+        <div class="video-item">
+          <video id="teaserl1" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/g1.mp4" type="video/mp4">
+          </video><div class="caption">Open the middle drawer of the cabinet </div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl2" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/g2.mp4" type="video/mp4">
+          </video><div class="caption">Put the bowl on the stove</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl3" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/g3.mp4" type="video/mp4">
+          </video><div class="caption">Put the wine bottle on top of the cabinet</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl4" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/g4.mp4" type="video/mp4">
+          </video><div class="caption">Open the top drawer and put the bowl inside</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl5" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/g5.mp4" type="video/mp4">
+          </video><div class="caption">Put the bowl on top of the cabinet </div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl6" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/g6.mp4" type="video/mp4">
+          </video><div class="caption">Push the plate to the front of the stove</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl7" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/g7.mp4" type="video/mp4">
+          </video><div class="caption">Put the wine bottle on the rack</div>
+        </div>
+      </div>
+
+      <!------------------------------------------------------->
+      <!----------------- LIBERO-Long  ------------------>
+      <!------------------------------------------------------->
+      <h2 class="title is-4" style="font-family: 'Google Sans', sans-serif; margin-top: 1rem; font-size: 22px;">
+        LIBERO-Long</h2>
+      <div class="video-container">
+        <div class="video-item">
+          <video id="teaser2" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/12.mp4" type="video/mp4">
+          </video><div class="caption">Put both the cream cheese box and the butter in the basket</div>
+        </div>
+        <div class="video-item">
+          <video id="teaser4" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/14.mp4" type="video/mp4">
+          </video><div class="caption">Put the black bowl in the bottom drawer of the cabinet and close it</div>
+        </div>
+        <div class="video-item">
+          <video id="teaser8" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/13.mp4" type="video/mp4">
+          </video><div class="caption">Turn on the stove and put the moka pot on it</div>
+        </div>
+        <div class="video-item">
+          <video id="teaser10" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/15.mp4" type="video/mp4">
+          </video><div class="caption">Put the white mug on the left plate and put the yellow and white mug on the right plate</div>
+        </div>
+        <div class="video-item">
+          <video id="teaser14" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/19.mp4" type="video/mp4">
+          </video><div class="caption">Put both moka pots on the stove</div>
+        </div>
+        <div class="video-item">
+          <video id="teaser18" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/18.mp4" type="video/mp4">
+          </video><div class="caption">Put both the alphabet soup and the cream cheese box in the basket</div>
+        </div>
+        <div class="video-item">
+          <video id="teaser20" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/20.mp4" type="video/mp4">
+          </video><div class="caption">Put the yellow and white mug in the microwave and close it</div>
+        </div>
+      </div>
+
+      <!------------------------------------------------------->
+      <!---------------- CALVIN ABC->D  ----------------->
+      <!------------------------------------------------------->
+      <h2 class="title is-4" style="font-family: 'Google Sans', sans-serif; margin-top: 1rem; font-size: 22px;">
+        CALVIN ABC->D</h2>
+      <div class="video-container">
+        <div class="video-item">
+          <video id="teaserc11" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/1.mp4" type="video/mp4">
+          </video><div class="caption">Open drawer➝Lift pink block table➝Place in slider➝Turn on lightbulb➝Rotate blue block left</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserc51" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/5.mp4" type="video/mp4">
+          </video><div class="caption">Lift red block table➝Place in drawer➝Rotate blue block right➝Lift pink block slider ➝Stack block</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserc7" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/2.mp4" type="video/mp4">
+          </video><div class="caption">Move slider right➝Turn on lightbulb➝Push pink block left➝Open drawer➝Push into drawer</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserc9" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/4.mp4" type="video/mp4">
+          </video><div class="caption">Push pink block right➝Lift red block table➝Stack block➝Move slider left➝Unstack block</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserc111" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/6.mp4" type="video/mp4">
+          </video><div class="caption">Turn off led➝Close drawer➝Move slider left➝Push pink block right➝Lift red block slider</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserc13" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/8.mp4" type="video/mp4">
+          </video><div class="caption">Push into drawer➝Close drawer➝Move slider right ➝Lift pink block slider➝Place in slider</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserc19" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero_calvin/9.mp4" type="video/mp4">
+          </video><div class="caption">Turn off lightbulb➝Move slider left➝Push blue block left➝Lift pink block slider➝ Stack block</div>
+        </div>
+      </div>
+
+    </div>
+
+    <section class="section">
+        <div class="container is-max-widescreen">
+            <h2 class="title">Adaptive Computation Examples</h2>
+
+            <style>
+                .keyframe-grid-video {
+                    width: 100%;
+                    background: #000;
+                    border-radius: 6px;
+                }
+                .keyframe-grid-caption {
+                    margin-bottom: 8px;
+                    text-align: center;
+                    font-size: 18px;
+                    font-weight: 700;
+                    color: #444;
+                }
+                .keyframe-grid-slider-wrap {
+                    margin-top: 10px;
+                    display: flex;
+                    justify-content: center;
+                }
+                .keyframe-grid-slider {
+                    width: 88%;
+                }
+            </style>
+
+            <div class="columns is-variable is-4">
+                <div class="column">
+                    <p class="keyframe-grid-caption">Short-horizon Task</p>
+                    <video id="keyframe-autoplay-video-1" class="keyframe-grid-video" autoplay muted loop playsinline preload="metadata"></video>
+                </div>
+                <div class="column">
+                    <p class="keyframe-grid-caption">Long-horizon Task</p>
+                    <video id="keyframe-autoplay-video-2" class="keyframe-grid-video" autoplay muted loop playsinline preload="metadata"></video>
+                </div>
+                <div class="column">
+                    <p class="keyframe-grid-caption">Long-horizon Task (Failed)</p>
+                    <video id="keyframe-autoplay-video-3" class="keyframe-grid-video" autoplay muted loop playsinline preload="metadata"></video>
+                </div>
+            </div>
+
+            <div class="columns is-variable is-4">
+                <div class="column">
+                    <video id="keyframe-scrub-video-1" class="keyframe-grid-video" muted playsinline preload="metadata"></video>
+                    <div class="keyframe-grid-slider-wrap">
+                        <input class="slider is-info keyframe-grid-slider" id="keyframe-scrub-slider-1" step="1" min="0" max="100" value="0" type="range">
+                    </div>
+                </div>
+                <div class="column">
+                    <video id="keyframe-scrub-video-2" class="keyframe-grid-video" muted playsinline preload="metadata"></video>
+                    <div class="keyframe-grid-slider-wrap">
+                        <input class="slider is-info keyframe-grid-slider" id="keyframe-scrub-slider-2" step="1" min="0" max="100" value="0" type="range">
+                    </div>
+                </div>
+                <div class="column">
+                    <video id="keyframe-scrub-video-3" class="keyframe-grid-video" muted playsinline preload="metadata"></video>
+                    <div class="keyframe-grid-slider-wrap">
+                        <input class="slider is-info keyframe-grid-slider" id="keyframe-scrub-slider-3" step="1" min="0" max="100" value="0" type="range">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section class="section">
+        <div class="container is-max-widescreen">
+            <h2 class="title">Real-world Experiments</h2>
+            Task
+            <div class="select is-small">
+                <select id="comparison-menu-task-name" onchange="updateComparisonVideo()">
+                    <option value="fold_towel" selected="selected">fold_towel</option>
+                    <option value="put_the_cube_into_the_bowl">put_the_cube_into_the_bowl</option>
+                    <option value="toast_the_bread">toast_the_bread</option>
+                    <option value="wipe_the_dish">wipe_the_dish</option>
+                </select>
+            </div>
+            RD-VLA
+            <div class="select is-small">
+                <select id="comparison-menu-rdvla-name" onchange="updateComparisonVideo()">
+                    <option value="8_iterations" selected="selected">8 iterations</option>
+                    <option value="adaptive">adaptive</option>
+                </select>
+            </div>
+            Baseline
+            <div class="select is-small">
+                <select id="comparison-menu-baseline-name" onchange="updateComparisonVideo()">
+                    <option value="dp" selected="selected">DP</option>
+                    <option value="pi05">pi0.5</option>
+                </select>
+            </div>
+            Speed
+            <div class="select is-small">
+                <select id="comparison-menu-speed" onchange="updateComparisonPlaybackRate()">
+                    <option value="1" selected="selected">1x</option>
+                    <option value="2">2x</option>
+                    <option value="4">4x</option>
+                    <option value="8">8x</option>
+                </select>
+            </div>
+            <br>
+            <br>
+            <div class="columns is-centered">
+                <div class="column">
+                    <div class="columns is-centered">
+                        <div class="column content">
+                            <h2 class="title is-4">RD-VLA</h2>
+                            <video id="comparison-menu-video-rdvla" muted autoplay muted loop playsinline>
+                                <source src="static/videos/real_world/fold_towel/rd_vla_8_iterations.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="columns is-centered">
+                        <div class="column content">
+                            <h2 class="title is-4">Baseline</h2>
+                            <video id="comparison-menu-video-baseline" muted autoplay muted loop playsinline>
+                                <source src="static/videos/real_world/fold_towel/baseline_dp.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="section" id="BibTeX">
+        <div class="container is-max-desktop">
+            <h2 class="title">BibTeX</h2>
+            <pre><code>@misc{fang2025sam2act,
+      title={SAM2Act: Integrating Visual Foundation Model with A Memory Architecture for Robotic Manipulation}, 
+      author={Haoquan Fang and Markus Grotz and Wilbert Pumacay and Yi Ru Wang and Dieter Fox and Ranjay Krishna and Jiafei Duan},
+      year={2025},
+      eprint={2501.18564},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2501.18564}, 
+}</code></pre>
+        </div>
+    </section>
+
+    <footer class="footer"  style="padding-bottom: 3rem !important;">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column">
+                    <div class="content has-text-centered">
+                        <p> 
+                            Website borrowed from <a href="https://github.com/nerfies/nerfies.github.io">NeRFies</a> under a <a
+                            href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0
+                            International</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
