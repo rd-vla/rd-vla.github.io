@@ -163,7 +163,7 @@
             const baselineSetting = baselineElement.value;
             const rdvlaFileMap = {
                 "8_iterations": "8_iterations",
-                "adaptive": "8_adaptive",
+                "adaptive": "adaptive",
             };
             const baselineFileMap = {
                 "dp": "dp",
@@ -603,7 +603,7 @@
         LIBERO-Spatial</h2>
       <style>
         .video-container {display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px;}
-        .video-item {width: 13.3%; display: flex; flex-direction: column; align-items: center; text-align: center;}
+        .video-item {width: calc((100% - 50px) / 6); display: flex; flex-direction: column; align-items: center; text-align: center;}
         .video-item video {width: 100%; height: auto;}
         .caption {margin-top: 5px; font-size: 13px; color: #555;}
       </style>
@@ -611,38 +611,33 @@
       <div class="video-container">
         <div class="video-item">
           <video id="teaserl1s" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/s1.mp4" type="video/mp4">
-          </video><div class="caption">Pick up the black bowl between the plate and the ramekin and place it on the plate </div>
+            <source src="./static/videos/libero/spatial-1.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the black bowl next to the cookie box and place it on the plate</div>
         </div>
         <div class="video-item">
           <video id="teaserl2s" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/s2.mp4" type="video/mp4">
-          </video><div class="caption">Pick up the black bowl next to the ramekin and place it on the plate</div>
+            <source src="./static/videos/libero/spatial-2.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the black bowl on the ramekin and place it on the plate</div>
         </div>
         <div class="video-item">
           <video id="teaserl3s" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/s3.mp4" type="video/mp4">
-          </video><div class="caption">Pick up the black bowl from table center and place it on the plate</div>
-        </div>
-        <div class="video-item">
-          <video id="teaserl4s" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/s4.mp4" type="video/mp4">
-          </video><div class="caption">Pick up the black bowl on the cookie box and place it on the plate</div>
-        </div>
-        <div class="video-item">
-          <video id="teaserl5s" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/s5.mp4" type="video/mp4">
+            <source src="./static/videos/libero/spatial-3.mp4" type="video/mp4">
           </video><div class="caption">Pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate</div>
         </div>
         <div class="video-item">
-          <video id="teaserl6s" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/s6.mp4" type="video/mp4">
-          </video><div class="caption">Pick up the black bowl on the stove and place it on the plate</div>
+          <video id="teaserl4s" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero/spatial-4.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the black bowl from table center and place it on the plate</div>
         </div>
         <div class="video-item">
-          <video id="teaserl7s" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/s7.mp4" type="video/mp4">
-          </video><div class="caption">Pick up the black bowl next to the plate and place it on the plate</div>
+          <video id="teaserl5s" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero/spatial-5.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the black bowl between the plate and the ramekin and place it on the plate</div>
+        </div>
+        <div class="video-item">
+          <video id="teaserl6s" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero/spatial-6.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the black bowl on the wooden cabinet and place it on the plate</div>
         </div>
       </div>
 
@@ -654,38 +649,33 @@
       <div class="video-container">
         <div class="video-item">
           <video id="teaserl1o" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/Long1.mp4" type="video/mp4">
+            <source src="./static/videos/libero/object-1.mp4" type="video/mp4">
           </video><div class="caption">Pick up the alphabet soup and place it in the basket</div>
         </div>
         <div class="video-item">
           <video id="teaserl2o" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/Long2.mp4" type="video/mp4">
-          </video><div class="caption">Pick up the salad dressing and place it in the basket</div>
+            <source src="./static/videos/libero/object-2.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the cream cheese and place it in the basket</div>
         </div>
         <div class="video-item">
           <video id="teaserl3o" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/Long3.mp4" type="video/mp4">
-          </video><div class="caption">Pick up the bbq sauce and place it in the basket</div>
+            <source src="./static/videos/libero/object-3.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the salad dressing and place it in the basket</div>
         </div>
         <div class="video-item">
           <video id="teaserl4o" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/Long4.mp4" type="video/mp4">
-          </video><div class="caption">Pick up the ketchup and place it in the basket </div>
+            <source src="./static/videos/libero/object-4.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the bbq sauce and place it in the basket </div>
         </div>
         <div class="video-item">
           <video id="teaserl5o" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/Long5.mp4" type="video/mp4">
-          </video><div class="caption">Pick up the tomato sauce and place it in the basket</div>
+            <source src="./static/videos/libero/object-5.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the ketchup and place it in the basket</div>
         </div>
         <div class="video-item">
           <video id="teaserl6o" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/Long6.mp4" type="video/mp4">
-          </video><div class="caption">Pick up the milk and place it in the basket  </div>
-        </div>
-        <div class="video-item">
-          <video id="teaserl7o" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/Long7.mp4" type="video/mp4">
-          </video><div class="caption">Pick up the chocolate pudding and place it in the basket </div>
+            <source src="./static/videos/libero/object-6.mp4" type="video/mp4">
+          </video><div class="caption">Pick up the tamoto sauce and place it in the basket  </div>
         </div>
       </div>
 
@@ -697,38 +687,33 @@
       <div class="video-container">
         <div class="video-item">
           <video id="teaserl1" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/g1.mp4" type="video/mp4">
+            <source src="./static/videos/libero/goal-1.mp4" type="video/mp4">
           </video><div class="caption">Open the middle drawer of the cabinet </div>
         </div>
         <div class="video-item">
           <video id="teaserl2" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/g2.mp4" type="video/mp4">
+            <source src="./static/videos/libero/goal-2.mp4" type="video/mp4">
           </video><div class="caption">Put the bowl on the stove</div>
         </div>
         <div class="video-item">
           <video id="teaserl3" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/g3.mp4" type="video/mp4">
+            <source src="./static/videos/libero/goal-3.mp4" type="video/mp4">
           </video><div class="caption">Put the wine bottle on top of the cabinet</div>
         </div>
         <div class="video-item">
           <video id="teaserl4" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/g4.mp4" type="video/mp4">
+            <source src="./static/videos/libero/goal-4.mp4" type="video/mp4">
           </video><div class="caption">Open the top drawer and put the bowl inside</div>
         </div>
         <div class="video-item">
           <video id="teaserl5" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/g5.mp4" type="video/mp4">
+            <source src="./static/videos/libero/goal-5.mp4" type="video/mp4">
           </video><div class="caption">Put the bowl on top of the cabinet </div>
         </div>
         <div class="video-item">
           <video id="teaserl6" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/g6.mp4" type="video/mp4">
+            <source src="./static/videos/libero/goal-6.mp4" type="video/mp4">
           </video><div class="caption">Push the plate to the front of the stove</div>
-        </div>
-        <div class="video-item">
-          <video id="teaserl7" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/g7.mp4" type="video/mp4">
-          </video><div class="caption">Put the wine bottle on the rack</div>
         </div>
       </div>
 
@@ -740,38 +725,33 @@
       <div class="video-container">
         <div class="video-item">
           <video id="teaser2" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/12.mp4" type="video/mp4">
-          </video><div class="caption">Put both the cream cheese box and the butter in the basket</div>
+            <source src="./static/videos/libero/long-1.mp4" type="video/mp4">
+          </video><div class="caption">Turn on the stove and put the moka pot on it</div>
         </div>
         <div class="video-item">
           <video id="teaser4" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/14.mp4" type="video/mp4">
+            <source src="./static/videos/libero/long-2.mp4" type="video/mp4">
           </video><div class="caption">Put the black bowl in the bottom drawer of the cabinet and close it</div>
         </div>
         <div class="video-item">
           <video id="teaser8" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/13.mp4" type="video/mp4">
-          </video><div class="caption">Turn on the stove and put the moka pot on it</div>
-        </div>
-        <div class="video-item">
-          <video id="teaser10" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/15.mp4" type="video/mp4">
-          </video><div class="caption">Put the white mug on the left plate and put the yellow and white mug on the right plate</div>
-        </div>
-        <div class="video-item">
-          <video id="teaser14" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/19.mp4" type="video/mp4">
+            <source src="./static/videos/libero/long-3.mp4" type="video/mp4">
           </video><div class="caption">Put both moka pots on the stove</div>
         </div>
         <div class="video-item">
-          <video id="teaser18" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/18.mp4" type="video/mp4">
+          <video id="teaser10" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero/long-4.mp4" type="video/mp4">
           </video><div class="caption">Put both the alphabet soup and the cream cheese box in the basket</div>
         </div>
         <div class="video-item">
-          <video id="teaser20" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/20.mp4" type="video/mp4">
-          </video><div class="caption">Put the yellow and white mug in the microwave and close it</div>
+          <video id="teaser14" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero/long-5.mp4" type="video/mp4">
+          </video><div class="caption">Put both the alphabet soup and the tomato sauce in the basket</div>
+        </div>
+        <div class="video-item">
+          <video id="teaser18" autoplay muted loop playsinline preload="none" loading="lazy">
+            <source src="./static/videos/libero/long-6.mp4" type="video/mp4">
+          </video><div class="caption">Put both the cream cheese box and the butter in the basket</div>
         </div>
       </div>
 
@@ -783,38 +763,33 @@
       <div class="video-container">
         <div class="video-item">
           <video id="teaserc11" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/1.mp4" type="video/mp4">
-          </video><div class="caption">Open drawer➝Lift pink block table➝Place in slider➝Turn on lightbulb➝Rotate blue block left</div>
+            <source src="./static/videos/calvin/1/full.mp4" type="video/mp4">
+          </video><div class="caption">Move slider left<br>Rotate red block left<br>Turn off led<br>Lift pink block table<br>Place in slider</div>
         </div>
         <div class="video-item">
           <video id="teaserc51" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/5.mp4" type="video/mp4">
-          </video><div class="caption">Lift red block table➝Place in drawer➝Rotate blue block right➝Lift pink block slider ➝Stack block</div>
+            <source src="./static/videos/calvin/2/full.mp4" type="video/mp4">
+          </video><div class="caption">Lift red block slider<br>Stack block<br>Move slider left<br>Turn off led<br>Open drawer</div>
         </div>
         <div class="video-item">
           <video id="teaserc7" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/2.mp4" type="video/mp4">
-          </video><div class="caption">Move slider right➝Turn on lightbulb➝Push pink block left➝Open drawer➝Push into drawer</div>
+            <source src="./static/videos/calvin/3/full.mp4" type="video/mp4">
+          </video><div class="caption">Push red block left<br>Lift pink block slider<br>Stack block<br>Turn off led<br>Open drawer</div>
         </div>
         <div class="video-item">
           <video id="teaserc9" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/4.mp4" type="video/mp4">
-          </video><div class="caption">Push pink block right➝Lift red block table➝Stack block➝Move slider left➝Unstack block</div>
+            <source src="./static/videos/calvin/4/full.mp4" type="video/mp4">
+          </video><div class="caption">Move slider left<br>Lift red block table<br>Place in slider<br>Turn on lightbulb<br>Close drawer</div>
         </div>
         <div class="video-item">
           <video id="teaserc111" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/6.mp4" type="video/mp4">
-          </video><div class="caption">Turn off led➝Close drawer➝Move slider left➝Push pink block right➝Lift red block slider</div>
+            <source src="./static/videos/calvin/5/full.mp4" type="video/mp4">
+          </video><div class="caption">Push blue block right<br>Open drawer<br>Lift pink block slider<br>Place in slider<br>Push into drawer</div>
         </div>
         <div class="video-item">
           <video id="teaserc13" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/8.mp4" type="video/mp4">
-          </video><div class="caption">Push into drawer➝Close drawer➝Move slider right ➝Lift pink block slider➝Place in slider</div>
-        </div>
-        <div class="video-item">
-          <video id="teaserc19" autoplay muted loop playsinline preload="none" loading="lazy">
-            <source src="./static/videos/libero_calvin/9.mp4" type="video/mp4">
-          </video><div class="caption">Turn off lightbulb➝Move slider left➝Push blue block left➝Lift pink block slider➝ Stack block</div>
+            <source src="./static/videos/calvin/6/full.mp4" type="video/mp4">
+          </video><div class="caption">Move slider right<br>Turn on led<br>Lift pink block slider<br>Place in drawer<br>Lift pink block drawer</div>
         </div>
       </div>
 
